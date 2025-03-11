@@ -1,22 +1,21 @@
 from dataclasses import dataclass, field
+from typing import Optional
 
 from api import client
 
 
 @dataclass
 class Contact:
-    id = field(default=None, init=False)  # Se asigna después de la creación
+    id: Optional[str] = field(default=None, init=False)  # Now with type annotation
     first_name: str
-    second_name: str
     last_name: str
-    gender: str
+    relationship: str
 
     def __post_init__(self):
         contact = client.doCreate(
             'Contacts',
             {
                 "firstname": self.first_name,
-                # "cf_934": self.second_name,
                 "lastname": self.last_name,
             },
         )

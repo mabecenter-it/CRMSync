@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import List, Optional
 
 from api import client
 
@@ -9,21 +9,36 @@ from crmsync.api.models.contact import Contact
 @dataclass
 class Policy:
     id: Optional[int] = field(default=None, init=False)  # Se asigna después de la creación
-    subject: str
-    contactid: str
+    contacts: List[Contact]
+    productid: str
+
+    def get_contacts_by_relationship(self, relationship) -> List[Contact]:
+        return [contact for contact in self.contacts if contact.relationship == relationship]
+
+    def get_owner(self) -> Contact:
+        return self.get_contacts_by_relationship('Owner')[0]
+
+    def get_spouse(self) -> Contact:
+        return self.get_contacts_by_relationship('Spouse')[0]
 
     def __post_init__(self):
+        owner = self.get_owner()
+        subject = f"{owner.first_name} {owner.last_name}"
+        # spouse = self.get_spouse()
         policy = client.doCreate(
             "SalesOrder",
             {
-                "subject": self.subject,
-                "status": "Created",
+                "subject": subject,
+                "sostatus": "Created",
                 "account_id": "11x3",
-                "contact_id": self.contactid,
+                "contact_id": owner.id,
                 "bill_street": "1",
                 "ship_street": "1",
                 "assigned_user_id": "19x1",
-                "LineItems": [{"productid": "14x4", "listprice": "0", "quantity": "1"}],
+                "enable_recurring": "0",
+                "invoicestatus": "Created",
+                "productid": self.productid,
+                "LineItems": [{"productid": self.productid, "listprice": "0", "quantity": "1"}],
             },
         )
         self.id = policy.get("id")
