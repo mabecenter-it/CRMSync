@@ -1,0 +1,9 @@
+<module>
+    <name>HelloWorld</name>
+    <label>Hello World</label>
+    <parent></parent>
+    <version>1.0</version>
+    <dependencies>
+        <vtiger_version>7.*</vtiger_version>
+    </dependencies>
+</module>
