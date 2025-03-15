@@ -38,12 +38,12 @@ class Syncer:
             ]
 
             with self.unit_of_work as uow:
-                base_query = uow.query(
-                    VTigerSalesOrderCF,
+                # Extraer todas las columnas de VTigerContactsCF
+                base_query = uow.query(  # Added model
                     VTigerSalesOrderCF.broker,
                     VTigerSalesOrderCF.saleswoman,
-                    VTigerContactsCF,
-                    VTigerContactDetails,
+                    VTigerSalesOrderCF,
+                    VTigerContactsCF,  # Already there
                 ).select_from(VTigerSalesOrderCF)
 
                 # Aplicar los JOINs de forma recursiva
@@ -61,17 +61,8 @@ class Syncer:
                 df = pd.read_sql(query.statement, uow.bind)
 
                 for _, row in tqdm(df.iterrows(), total=df.shape[0]):
-                    PolicyAssembler(row)
-
-                """ self.client.doCreate('Contacts', {
-                    "firstname": "Testing2",
-                    "lastname": "Testing2",
-                    "birthday":"2025-01-01",
-                    "cf_860": "FEMALE",
-                    "assigned_user_id": "19x1"
-                })
-                logger.info("Data synced successfully.") """
-
+                    row_filter = row[row != '']
+                    PolicyAssembler(row_filter)
         except Exception as e:
             print(f"Error: {e}")
             return False

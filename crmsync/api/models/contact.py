@@ -10,13 +10,23 @@ class Contact:
     first_name: str
     last_name: str
     relationship: str
+    account_name: str
 
     def __post_init__(self):
-        contact = client.doCreate(
-            'Contacts',
-            {
-                "firstname": self.first_name,
-                "lastname": self.last_name,
-            },
-        )
-        self.id = contact.get("id")
+        if self.first_name and self.last_name:
+            query = f"""
+                SELECT * FROM Contacts
+                WHERE firstname = '{self.first_name}' and lastname = '{self.last_name}'
+                LIMIT 1
+            """
+            data = next(iter(client.doQuery(query)), None)
+            if not data:
+                data = client.doCreate(
+                    'Contacts',
+                    {"firstname": self.first_name, "lastname": self.last_name, "accountname": self.account_name},
+                )
+            self.id = data.get("id")
+
+    def update(self, accountid):
+        self.data['accountname'] = accountid
+        client.doUpdate(self.data)

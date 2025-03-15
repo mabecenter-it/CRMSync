@@ -10,27 +10,31 @@ from crmsync.api.models.contact import Contact
 class Policy:
     id: Optional[int] = field(default=None, init=False)  # Se asigna después de la creación
     contacts: List[Contact]
+    accountid: str
     productid: str
 
     def get_contacts_by_relationship(self, relationship) -> List[Contact]:
         return [contact for contact in self.contacts if contact.relationship == relationship]
 
     def get_owner(self) -> Contact:
-        return self.get_contacts_by_relationship('Owner')[0]
+        [owner] = self.get_contacts_by_relationship('Owner')
+        return owner
 
     def get_spouse(self) -> Contact:
-        return self.get_contacts_by_relationship('Spouse')[0]
+        [spouse] = self.get_contacts_by_relationship('dependent_1')
+        return spouse
 
     def __post_init__(self):
         owner = self.get_owner()
+        spouse = self.get_spouse()
         subject = f"{owner.first_name} {owner.last_name}"
-        # spouse = self.get_spouse()
+
         policy = client.doCreate(
             "SalesOrder",
             {
                 "subject": subject,
                 "sostatus": "Created",
-                "account_id": "11x3",
+                "account_id": self.accountid,
                 "contact_id": owner.id,
                 "bill_street": "1",
                 "ship_street": "1",
@@ -38,6 +42,7 @@ class Policy:
                 "enable_recurring": "0",
                 "invoicestatus": "Created",
                 "productid": self.productid,
+                "cf_dependent_1": spouse.id,
                 "LineItems": [{"productid": self.productid, "listprice": "0", "quantity": "1"}],
             },
         )

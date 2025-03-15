@@ -1,5 +1,8 @@
+import json
+import os
 from typing import List
 
+from api.models.account import Account
 from api.models.product import Product
 from pandas import Series
 
@@ -14,14 +17,50 @@ class PolicyAssembler:
 
         # Crear el objeto Contact a partir del registro.
 
+        account = self.get_account(row)
+        contacts: List[Contact] = self.get_contacts(row, account.id)
+        self.update_account(contacts, account.id)
         product = self.get_product(row)
-        contacts: List[Contact] = self.get_contacts(row)
 
-        self.get_policies(contacts, product.id)
+        self.get_policies(contacts, account.id, product.id)
 
         # policy.add_contact(contact)
         # Retornamos una lista de objetos Policy
         # return list(policy.values())
+
+    def update_account(self, contacts, accountid):
+        for contact in contacts:
+            contact.update(accountid)
+
+    def get_account(self, row) -> Account:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(current_dir, "account_mapping.json")
+        with open(file_path, "r", encoding="utf-8") as f:
+            contact_mapping = json.load(f)
+
+        for cfg in contact_mapping:
+            # Si existe una clave "condition" y no se cumple, se salta este contacto.
+            if "condition" in cfg and not row.get(cfg["condition"]):
+                continue
+            return Account(
+                first_name=row.get(cfg["first_name"]),
+                last_name=row.get(cfg["last_name"]),
+                second_name=row.get(cfg["second_name"]),
+                gender=row.get(cfg["gender"]),
+                dob=row.get(cfg["dob"]),
+                SSN=row.get(cfg["SSN"]),
+                income=row.get(cfg["income"]),
+                phone1=row.get(cfg["phone1"]),
+                otherphone=row.get(cfg["otherphone"]),
+                emergencyphone=row.get(cfg["emergencyphone"]),
+                email1=row.get(cfg["email1"]),
+                email2=row.get(cfg["email2"]),
+                ship_street=row.get(cfg["ship_street"]),
+                ship_pobox=row.get(cfg["ship_pobox"]),
+                ship_city=row.get(cfg["ship_city"]),
+                ship_state=row.get(cfg["ship_state"]),
+                ship_code=row.get(cfg["ship_code"]),
+            )
 
     def get_product(self, row) -> Product:
         return Product(
@@ -29,60 +68,32 @@ class PolicyAssembler:
             benefitid=row.get('cf_2203'),
         )
 
-    def get_contacts(self, row) -> List[Contact]:
-        contacts = [
-            Contact(
-                first_name=row.get('cf_2293'),
-                last_name=row.get('cf_2297'),
-                relationship='Owner',
-            ),
-            Contact(
-                first_name=row.get('cf_2347'),
-                last_name=row.get('cf_2351'),
-                relationship='Spouse',
-            )
-            if row.get('cf_2385')
-            else None,
-            Contact(
-                first_name=row.get('cf_2405'),
-                last_name=row.get('cf_2409'),
-                relationship='dependent_1',
-            )
-            if row.get('cf_2401')
-            else None,
-            Contact(
-                first_name=row.get('cf_2443'),
-                last_name=row.get('cf_2447'),
-                relationship='dependent_2',
-            )
-            if row.get('cf_2439')
-            else None,
-            Contact(
-                first_name=row.get('cf_2479'),
-                last_name=row.get('cf_2483'),
-                relationship='dependent_3',
-            )
-            if row.get('cf_2415')
-            else None,
-            Contact(
-                first_name=row.get('cf_2515'),
-                last_name=row.get('cf_2519'),
-                relationship='dependent_4',
-            )
-            if row.get('cf_2511')
-            else None,
-            Contact(
-                first_name=row.get('cf_2645'),
-                last_name=row.get('cf_2649'),
-                relationship='dependent_5',
-            )
-            if row.get('cf_2615')
-            else None,
-        ]
-        return [contact for contact in contacts if contact is not None]
+    def get_contacts(self, row, accountid) -> List[Contact]:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(current_dir, "contacts_mapping.json")
+        with open(file_path, "r", encoding="utf-8") as f:
+            contact_mapping = json.load(f)
 
-    def get_policies(self, contacts, productid) -> Policy:
+        contacts = []
+
+        for cfg in contact_mapping:
+            # Si existe una clave "condition" y no se cumple, se salta este contacto.
+            if "condition" in cfg and not row.get(cfg["condition"]):
+                continue
+
+            contacts.append(
+                Contact(
+                    first_name=row.get(cfg["first_name"]),
+                    last_name=row.get(cfg["last_name"]),
+                    relationship=cfg["relationship"],
+                    account_name=accountid,
+                )
+            )
+        return contacts
+
+    def get_policies(self, contacts, accountid, productid) -> Policy:
         return Policy(
             contacts=contacts,
+            accountid=accountid,
             productid=productid,
         )
