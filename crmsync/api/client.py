@@ -29,7 +29,7 @@ class PolicyAssembler:
         # return list(policy.values())
 
     def update_account(self, contacts, accountid):
-        for contact in contacts:
+        for contact in (c for c in contacts if c.data):
             contact.update(accountid)
 
     def get_account(self, row) -> Account:
@@ -85,7 +85,15 @@ class PolicyAssembler:
                 Contact(
                     first_name=row.get(cfg["first_name"]),
                     last_name=row.get(cfg["last_name"]),
+                    second_name=row.get(cfg["second_name"]),
                     relationship=cfg["relationship"],
+                    gender=row.get(cfg["gender"]),
+                    dob=row.get(cfg["dob"]),
+                    ssn=row.get(cfg["ssn"]),
+                    document=row.get(cfg["document"]),
+                    memberid=row.get(cfg["memberid"]),
+                    username=row.get(cfg["username"]),
+                    password=row.get(cfg["password"]),
                     account_name=accountid,
                 )
             )

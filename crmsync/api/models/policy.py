@@ -20,13 +20,8 @@ class Policy:
         [owner] = self.get_contacts_by_relationship('Owner')
         return owner
 
-    def get_spouse(self) -> Contact:
-        [spouse] = self.get_contacts_by_relationship('dependent_1')
-        return spouse
-
     def __post_init__(self):
         owner = self.get_owner()
-        spouse = self.get_spouse()
         subject = f"{owner.first_name} {owner.last_name}"
 
         policy = client.doCreate(
@@ -42,8 +37,10 @@ class Policy:
                 "enable_recurring": "0",
                 "invoicestatus": "Created",
                 "productid": self.productid,
-                "cf_dependent_1": spouse.id,
                 "LineItems": [{"productid": self.productid, "listprice": "0", "quantity": "1"}],
+            } | {
+                f"cf_dependent_{i+1}": contact.id
+                for i, contact in enumerate([c for c in self.contacts[1:] if c.id])
             },
         )
         self.id = policy.get("id")
