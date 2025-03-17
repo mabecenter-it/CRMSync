@@ -7,6 +7,53 @@ class HelloWorld {
     public static function vtlib_handler($moduleName, $eventType) {
         if (in_array($eventType, ['module.postinstall', 'module.postupdate'])) {
             self::addCustomFields();
+            self::customAccountsFields();
+            self::customContactsFields();
+        }
+    }
+     public static function customAccountsFields() {
+        $module = Vtiger_Module::getInstance('Accounts');
+        $arrayTypes = ['ship_country', 'bill_country'];
+        foreach ($arrayTypes as $type) {           
+            $field = Vtiger_Field::getInstance($type, $module);
+
+            if ($field) {
+                $db = PearDatabase::getInstance();
+                $field->uitype = 15;
+                $db->pquery("UPDATE vtiger_field SET uitype = ? WHERE fieldid = ?", 
+                    [$field->uitype, $field->id]);
+                $field->setPicklistValues(['United States']);
+                $field->save();
+            }
+        }
+    }
+
+    public static function customContactsFields() {
+        $module = Vtiger_Module::getInstance('Contacts');
+        $module->customizedTable = 'vtiger_contactscf';
+        #$arrayFields = ['secondname', 'gender', 'social_security', 'document', 'work', 'income', 'language', 'smoke', 'jail'];
+        $arrayFields = ['secondname'];
+
+        $block = Vtiger_Block::getInstance('LBL_CONTACT_INFORMATION', $module);
+    
+        foreach ($arrayFields as $fieldName) {           
+            $field = Vtiger_Field::getInstance($fieldName, $module);
+            // Crear una nueva instancia de Vtiger_Field
+            if (!$field) {
+                $field = new Vtiger_Field();
+            }
+    
+            $field->name = $fieldName;
+            $field->label = 'Testing'; // Agregado el ";"
+            $field->column = $fieldName;
+            $field->table = $module->customizedTable;
+            $field->uitype = 55; // Tipo de dato (Número)
+            $field->typeofdata = 'V~O'; // Campo opcional
+            $field->sequence = 4; // Especificar la secuencia del campo
+    
+            // Añadir el campo al bloque
+            $block->addField($field);
+            $field->save(); // Guardar después de configurar todos los valores
         }
     }
 
