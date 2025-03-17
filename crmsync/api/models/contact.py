@@ -15,7 +15,7 @@ class Contact:
     smoke: Optional[str] = field(default=None, init=False)
     jail: Optional[str] = field(default=None, init=False)
     account_name: str
-    apply: str
+    #apply: str
     relationship: str
     first_name: str
     last_name: str
