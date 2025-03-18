@@ -14,13 +14,13 @@ class HelloWorld {
      public static function customAccountsFields() {
         $module = Vtiger_Module::getInstance('Accounts');
         $arrayTypes = ['ship_country', 'bill_country'];
-        foreach ($arrayTypes as $type) {           
+        foreach ($arrayTypes as $type) {
             $field = Vtiger_Field::getInstance($type, $module);
 
             if ($field) {
                 $db = PearDatabase::getInstance();
                 $field->uitype = 15;
-                $db->pquery("UPDATE vtiger_field SET uitype = ? WHERE fieldid = ?", 
+                $db->pquery("UPDATE vtiger_field SET uitype = ? WHERE fieldid = ?",
                     [$field->uitype, $field->id]);
                 $field->setPicklistValues(['United States']);
                 $field->save();
@@ -31,29 +31,12 @@ class HelloWorld {
     public static function customContactsFields() {
         $module = Vtiger_Module::getInstance('Contacts');
         $module->customizedTable = 'vtiger_contactscf';
-        #$arrayFields = ['secondname', 'gender', 'social_security', 'document', 'work', 'income', 'language', 'smoke', 'jail'];
-        $arrayFields = ['secondname'];
+        $arrayFields = ['second_name', 'gender', 'social_security', 'migratory', 'work', 'income', 'language', 'smoke', 'jail'];
 
         $block = Vtiger_Block::getInstance('LBL_CONTACT_INFORMATION', $module);
-    
-        foreach ($arrayFields as $fieldName) {           
-            $field = Vtiger_Field::getInstance($fieldName, $module);
-            // Crear una nueva instancia de Vtiger_Field
-            if (!$field) {
-                $field = new Vtiger_Field();
-            }
-    
-            $field->name = $fieldName;
-            $field->label = 'Testing'; // Agregado el ";"
-            $field->column = $fieldName;
-            $field->table = $module->customizedTable;
-            $field->uitype = 55; // Tipo de dato (Número)
-            $field->typeofdata = 'V~O'; // Campo opcional
-            $field->sequence = 4; // Especificar la secuencia del campo
-    
-            // Añadir el campo al bloque
-            $block->addField($field);
-            $field->save(); // Guardar después de configurar todos los valores
+
+        foreach ($arrayFields as $fieldName) {
+            self::createField($module, null, $type, $block);
         }
     }
 
@@ -86,73 +69,68 @@ class HelloWorld {
         }
     }
 
-    public static function createField($module, $index, $type, $customBlock) {
-        $fieldName = "cf_" . $type . "_" . $index;
-        $field = Vtiger_Field::getInstance($fieldName, $module);
+    public static function createField($module, $index = null, $type, $customBlock) {
+        // Definir el nombre del campo
+        $fieldName = $index ? "cf_{$type}_{$index}" : "cf_{$type}";
 
-        if (!$field) {
-            $field = new Vtiger_Field();
-        }
+        // Intentar obtener la instancia del campo si ya existe
+        $field = Vtiger_Field::getInstance($fieldName, $module) ?: new Vtiger_Field();
 
+        // Configurar propiedades del campo
         $field->name = $fieldName;
         $field->label = ucfirst($type);
         $field->column = $fieldName;
         $field->table = $module->customizedTable;
 
-        // Configurar opciones de picklist según el tipo
-        switch ($type) {
-            case 'relationship':
-                $field->setPicklistValues([
-                    'Owner',
-                    'Spouse',
-                    'Child',
-                    'Parent',
-                    'Sibling',
-                    'Other'
-                ]);
-                break;
-            case 'document':
-                $field->setPicklistValues([
-                    'Citizen',
-                    'Resident',
-                    'Work Permission',
-                    'Social Security',
-                    'Denegate Coverage',
-                    'Fiscal Credit',
-                    'No Jail',
-                    'Coverage Health'
-                ]);
-                break;
-            default:
-                break;
+        // Configuración de tipos de campo
+        $fieldsConfig = [
+            'expiration'     => ['uitype' => 5, 'typeofdata' => 'D~O'],
+            'income'         => ['uitype' => 7,  'typeofdata' => 'I~O'],
+            'dependent'      => ['uitype' => 10, 'typeofdata' => 'N~O', 'relatedModules' => ['Contacts']],
+            'work'           => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['1099', 'w2', 'subsidy']],
+            'language'       => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Spanish', 'English']],
+            'smoke'          => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Yes', 'No']],
+            'jail'           => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Yes', 'No']],
+            'relationship'   => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Owner', 'Spouse', 'Child', 'Parent', 'Sibling', 'Other']],
+            'gender'         => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Female', 'Male']],
+            'migratory'      => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => [
+                'Citizen', 'Resident', 'Work Permission', 'Social Security',
+                'Denegate Coverage', 'Fiscal Credit', 'No Jail', 'Coverage Health'
+            ]],
+            'document'       => ['uitype' => 33, 'typeofdata' => 'V~O', 'picklist' => [
+                'Citizen', 'Resident', 'Work Permission', 'Social Security',
+                'Denegate Coverage', 'Fiscal Credit', 'No Jail', 'Coverage Health'
+            ]],
+            'secondname'     => ['uitype' => 55, 'typeofdata' => 'V~O', 'sequence' => 2],
+            'social_security'=> ['uitype' => 55, 'typeofdata' => 'V~O'],
+        ];
+
+        // Aplicar la configuración si el tipo de campo está definido
+        if (isset($fieldsConfig[$type])) {
+            $config = $fieldsConfig[$type];
+            $field->uitype = $config['uitype'];
+            $field->typeofdata = $config['typeofdata'];
+
+            if (!empty($config['sequence'])) {
+                $field->sequence($config['sequence']);
+            }
+
+            // Asignar módulos relacionados si existen
+            if (!empty($config['relatedModules'])) {
+                $field->setRelatedModules($config['relatedModules']);
+            }
+
+            // Agregar y guardar el campo
+            $customBlock->addField($field);
+            $field->save();
+
+            // Asignar valores de Picklist si existen
+            if (!empty($config['picklist'])) {
+                $field->setPicklistValues($config['picklist']);
+            }
         }
 
-        $customBlock->addField($field);
-        $field->save();
 
-        switch ($type) {
-            case 'dependent':
-                $field->uitype = 10; // Número
-                $field->typeofdata = 'N~O';
-                $field->setRelatedModules(['Contacts']);
-                break;
-            case 'relationship':
-                $field->uitype = 15; // Picklist simple
-                $field->typeofdata = 'V~O';
-                break;
-            case 'document':
-                $field->uitype = 33; // Picklist multiselección
-                $field->typeofdata = 'V~O';
-                break;
-            case 'expiration':
-                $field->uitype = 5; // Date
-                $field->typeofdata = 'D~O';
-                break;
-            default:
-                break;
-        }
-
-        $customBlock->addField($field);
     }
 }
 
