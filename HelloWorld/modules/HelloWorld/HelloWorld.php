@@ -36,7 +36,7 @@ class HelloWorld {
         $block = Vtiger_Block::getInstance('LBL_CONTACT_INFORMATION', $module);
 
         foreach ($arrayFields as $fieldName) {
-            self::createField($module, null, $type, $block);
+            self::createField($module, null, $fieldName, $block);
         }
     }
 
@@ -111,9 +111,9 @@ class HelloWorld {
             $field->uitype = $config['uitype'];
             $field->typeofdata = $config['typeofdata'];
 
-            if (!empty($config['sequence'])) {
+            /* if (!empty($config['sequence'])) {
                 $field->sequence($config['sequence']);
-            }
+            } */
 
             // Asignar módulos relacionados si existen
             if (!empty($config['relatedModules'])) {
