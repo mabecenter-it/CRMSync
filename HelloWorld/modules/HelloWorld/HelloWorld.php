@@ -31,7 +31,7 @@ class HelloWorld {
     public static function customContactsFields() {
         $module = Vtiger_Module::getInstance('Contacts');
         $module->customizedTable = 'vtiger_contactscf';
-        $arrayFields = ['second_name', 'gender', 'social_security', 'migratory', 'work', 'income', 'language', 'smoke', 'jail'];
+        $arrayFields = ['contact_no', 'firstname', 'lastname', 'second_name', 'gender', 'social_security', 'migratory', 'work', 'income', 'language', 'smoke', 'jail', 'relationship', 'document', 'expiration'];
 
         $block = Vtiger_Block::getInstance('LBL_CONTACT_INFORMATION', $module);
 
@@ -50,7 +50,7 @@ class HelloWorld {
 
         // Para cada índice del 1 al 7, se crea un conjunto de campos
         for ($index = 1; $index <= 7; $index++) {
-            self::createArrayField($module, $index, ['dependent', 'relationship', 'document', 'expiration']);
+            self::createArrayField($module, $index, ['dependent', 'apply']);
         }
     }
 
@@ -70,59 +70,74 @@ class HelloWorld {
     }
 
     public static function createField($module, $index = null, $type, $customBlock) {
-        // Definir el nombre del campo
-        $fieldName = $index ? "cf_{$type}_{$index}" : "cf_{$type}";
+        $field = Vtiger_Field::getInstance($type, $module);
 
-        // Intentar obtener la instancia del campo si ya existe
-        $field = Vtiger_Field::getInstance($fieldName, $module) ?: new Vtiger_Field();
+        if (!$field) {
+            // Definir el nombre del campo
+            $fieldName = $index ? "cf_{$type}_{$index}" : "cf_{$type}";
+            // Intentar obtener la instancia del campo si ya existe
+            $field = Vtiger_Field::getInstance($fieldName, $module) ?: new Vtiger_Field();
 
-        // Configurar propiedades del campo
-        $field->name = $fieldName;
-        $field->label = ucfirst($type);
-        $field->column = $fieldName;
-        $field->table = $module->customizedTable;
+            // Configurar propiedades del campo
+            $field->name = $fieldName;
+            $field->label = ucwords(str_replace('_', ' ', $type));
+            $field->column = $fieldName;
+            $field->table = $module->customizedTable;
+            $field->save();
+        }
 
         // Configuración de tipos de campo
         $fieldsConfig = [
-            'expiration'     => ['uitype' => 5, 'typeofdata' => 'D~O'],
-            'income'         => ['uitype' => 7,  'typeofdata' => 'I~O'],
-            'dependent'      => ['uitype' => 10, 'typeofdata' => 'N~O', 'relatedModules' => ['Contacts']],
-            'work'           => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['1099', 'w2', 'subsidy']],
-            'language'       => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Spanish', 'English']],
-            'smoke'          => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Yes', 'No']],
-            'jail'           => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Yes', 'No']],
-            'relationship'   => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Owner', 'Spouse', 'Child', 'Parent', 'Sibling', 'Other']],
-            'gender'         => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Female', 'Male']],
-            'migratory'      => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => [
+            'contact_no'        => ['sequence' => 4],
+            'firstname'         => ['sequence' => 1],
+            'second_name'       => ['uitype' => 55, 'typeofdata' => 'V~O', 'sequence' => 2],
+            'lastname'          => ['sequence' => 3],
+            'expiration'        => ['uitype' => 5, 'typeofdata' => 'D~O'],
+            'income'            => ['uitype' => 7,  'typeofdata' => 'I~O'],
+            'dependent'         => ['uitype' => 10, 'typeofdata' => 'N~O', 'relatedModules' => ['Contacts']],
+            'work'              => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['1099', 'w2', 'subsidy']],
+            'language'          => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Spanish', 'English']],
+            'smoke'             => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Yes', 'No']],
+            'jail'              => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Yes', 'No']],
+            'relationship'      => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Owner', 'Spouse', 'Child', 'Parent', 'Sibling', 'Other']],
+            'gender'            => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Female', 'Male']],
+            'migratory'         => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => [
                 'Citizen', 'Resident', 'Work Permission', 'Social Security',
                 'Denegate Coverage', 'Fiscal Credit', 'No Jail', 'Coverage Health'
             ]],
-            'document'       => ['uitype' => 33, 'typeofdata' => 'V~O', 'picklist' => [
+            'document'          => ['uitype' => 33, 'typeofdata' => 'V~O', 'picklist' => [
                 'Citizen', 'Resident', 'Work Permission', 'Social Security',
                 'Denegate Coverage', 'Fiscal Credit', 'No Jail', 'Coverage Health'
             ]],
-            'secondname'     => ['uitype' => 55, 'typeofdata' => 'V~O', 'sequence' => 2],
-            'social_security'=> ['uitype' => 55, 'typeofdata' => 'V~O'],
+            'social_security'   => ['uitype' => 55, 'typeofdata' => 'V~O'],
         ];
 
         // Aplicar la configuración si el tipo de campo está definido
         if (isset($fieldsConfig[$type])) {
             $config = $fieldsConfig[$type];
-            $field->uitype = $config['uitype'];
-            $field->typeofdata = $config['typeofdata'];
 
-            /* if (!empty($config['sequence'])) {
-                $field->sequence($config['sequence']);
-            } */
+            if (!empty($config['uitype'])) {
+                $field->uitype = $config['uitype'];
+            }
+
+            if (!empty($config['typeofdata'])) {
+                $field->typeofdata = $config['typeofdata'];
+            }
 
             // Asignar módulos relacionados si existen
             if (!empty($config['relatedModules'])) {
                 $field->setRelatedModules($config['relatedModules']);
             }
 
+            if (!empty($config['sequence'])) {
+                $db = PearDatabase::getInstance();
+                $db->pquery("UPDATE vtiger_field SET sequence = ? WHERE fieldid = ?",
+                    [$config['sequence'], $field->id]);
+            }
+
             // Agregar y guardar el campo
-            $customBlock->addField($field);
             $field->save();
+            $customBlock->addField($field);
 
             // Asignar valores de Picklist si existen
             if (!empty($config['picklist'])) {

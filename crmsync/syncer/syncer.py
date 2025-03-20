@@ -1,5 +1,8 @@
+import inspect
+
 import pandas as pd
 from sqlalchemy import and_
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import sessionmaker
 from tqdm import tqdm
 
@@ -37,13 +40,24 @@ class Syncer:
                 (VTigerContactDetails, VTigerSalesOrder.contactid == VTigerContactDetails.contactid),
             ]
 
+            def get_dynamic_columns():
+                # Recorre los miembros de VTigerSalesOrderCF y recoge aquellos que sean propiedades híbridas
+                # y cuyo nombre comience por "gender_" o "ssn_"
+                return [
+                    member for member in inspect.getmembers(VTigerSalesOrderCF) if isinstance(member, hybrid_property)
+                ]
+
+            dynamic_columns = [
+                getattr(VTigerSalesOrderCF, key)
+                for key, value in VTigerSalesOrderCF.__dict__.items()
+                if isinstance(value, hybrid_property)
+            ]
+
             with self.unit_of_work as uow:
-                # Extraer todas las columnas de VTigerContactsCF
-                base_query = uow.query(  # Added model
-                    VTigerSalesOrderCF.broker,
-                    VTigerSalesOrderCF.saleswoman,
+                base_query = uow.query(
+                    *dynamic_columns,
                     VTigerSalesOrderCF,
-                    VTigerContactsCF,  # Already there
+                    VTigerContactsCF,
                 ).select_from(VTigerSalesOrderCF)
 
                 # Aplicar los JOINs de forma recursiva

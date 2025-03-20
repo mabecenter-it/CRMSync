@@ -28,9 +28,11 @@ class PolicyAssembler:
         # Retornamos una lista de objetos Policy
         # return list(policy.values())
 
-    def update_account(self, contacts, accountid):
+    def update_account(self, contacts: list[Contact], accountid):
         for contact in (c for c in contacts if c.data):
-            contact.update(accountid)
+            # Actualiza solo si el accountid actual es distinto al nuevo
+            if contact.account_name != accountid:
+                contact.update(accountid)
 
     def get_account(self, row) -> Account:
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -83,8 +85,10 @@ class PolicyAssembler:
 
             contacts.append(
                 Contact(
+                    # relationship=row.get(cfg["relationship"]),
                     first_name=row.get(cfg["first_name"]),
                     last_name=row.get(cfg["last_name"]),
+                    # apply=row.get(cfg["apply"]),
                     second_name=row.get(cfg["second_name"]),
                     relationship=cfg["relationship"],
                     gender=row.get(cfg["gender"]),
@@ -92,6 +96,8 @@ class PolicyAssembler:
                     ssn=row.get(cfg["ssn"]),
                     document=row.get(cfg["document"]),
                     memberid=row.get(cfg["memberid"]),
+                    # country=row.get(cfg["country"]),
+                    # work=row.get(cfg["work"]),
                     username=row.get(cfg["username"]),
                     password=row.get(cfg["password"]),
                     account_name=accountid,
