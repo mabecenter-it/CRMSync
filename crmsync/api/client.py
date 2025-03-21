@@ -88,7 +88,7 @@ class PolicyAssembler:
                     # relationship=row.get(cfg["relationship"]),
                     first_name=row.get(cfg["first_name"]),
                     last_name=row.get(cfg["last_name"]),
-                    # apply=row.get(cfg["apply"]),
+                    apply=row.get(cfg["apply"]),
                     second_name=row.get(cfg["second_name"]),
                     relationship=cfg["relationship"],
                     gender=row.get(cfg["gender"]),

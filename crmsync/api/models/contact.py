@@ -15,7 +15,7 @@ class Contact:
     smoke: Optional[str] = field(default=None, init=False)
     jail: Optional[str] = field(default=None, init=False)
     account_name: str
-    # apply: str
+    apply: str
     relationship: str
     first_name: str
     last_name: str
@@ -37,21 +37,21 @@ class Contact:
             """
             data = next(iter(client.doQuery(query)), None)
             new_data = {
-                # "apply": self.apply,
-                # "relationship": self.relationship,
+                "relationship": self.relationship,
                 "firstname": self.first_name,
-                "cf_second_name": self.second_name,
                 "lastname": self.last_name,
-                "account_id": self.account_name,
-                "birthday": self.dob.strftime("%Y-%m-%d"),
+                "cf_second_name": self.second_name,
                 "cf_gender": self.gender,
+                "birthday": self.dob.strftime("%Y-%m-%d"),
                 "cf_social_security": self.ssn,
                 "cf_migratory": self.document,
+                "cf_country": self.country,
                 "cf_work": self.work,
                 "cf_income": self.income if self.income else '0',
                 "cf_language": self.language,
                 "cf_smoke": self.smoke,
                 "cf_jail": self.jail,
+                "account_id": self.account_name,
             }
             if not data:
                 data = client.doCreate('Contacts', new_data)
