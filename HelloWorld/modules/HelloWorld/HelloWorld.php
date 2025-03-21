@@ -2,13 +2,32 @@
 include_once 'vtlib/Vtiger/Module.php';
 include_once 'modules/Contacts/Contacts.php';
 
-class HelloWorld {
+class HelloWorld extends Vtiger_Detail_View {
+
+    public function getFooterScripts(Vtiger_Request $request) {
+        // Obtiene los scripts originales
+        $footerScriptInstances = parent::getFooterScripts($request);
+
+        // Define la ruta de tu archivo JS personalizado
+        $jsFileNames = [
+            'modules/SalesOrder/resources/SalesOrder_Detail_Custom.js'
+        ];
+
+        // Convierte las rutas a objetos que vtiger entiende
+        $jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
+
+        // Combina los scripts originales con el nuevo script
+        return array_merge($footerScriptInstances, $jsScriptInstances);
+    }
 
     public static function vtlib_handler($moduleName, $eventType) {
         if (in_array($eventType, ['module.postinstall', 'module.postupdate'])) {
-            self::addCustomFields();
-            self::customAccountsFields();
-            self::customContactsFields();
+            //self::addCustomFields();
+            //self::customAccountsFields();
+            //self::customContactsFields();
+            $moduleInstance = Vtiger_Module::getInstance('SalesOrder');
+            $moduleInstance->addLink('HEADERSCRIPT', 'HelloWorldJS', 'modules/HelloWorld/resources/custom_script.js');
+
         }
     }
      public static function customAccountsFields() {
@@ -146,6 +165,24 @@ class HelloWorld {
         }
 
 
+    }
+}
+
+class SalesOrder_DetailView_Custom extends Vtiger_Detail_View {
+    public function getFooterScripts(Vtiger_Request $request) {
+        // Obtiene los scripts originales
+        $footerScriptInstances = parent::getFooterScripts($request);
+
+        // Define la ruta de tu archivo JS personalizado
+        $jsFileNames = [
+            'modules/SalesOrder/resources/SalesOrder_Detail_Custom.js'
+        ];
+
+        // Convierte las rutas a objetos que vtiger entiende
+        $jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
+
+        // Combina los scripts originales con el nuevo script
+        return array_merge($footerScriptInstances, $jsScriptInstances);
     }
 }
 
