@@ -1,0 +1,110 @@
+{
+	"modules": {
+		"Contacts": {
+			"blocks": ["contact_info", "communication_channels"]
+		},
+		"Accounts": {
+			"blocks": ["account_address"]
+		},
+		"SalesOrder": {
+			"blocks": ["dependents_dynamic"]
+		}
+	},
+	"blocks": {
+		"contact_info": {
+			"label": "LBL_CONTACT_INFORMATION",
+			"dynamic": false,
+			"fields": [
+				"saludation", "firstname", "second_name", "lastname",
+				"social_security", "work", "gender", "language", "migratory",
+				"jail", "income", "document", "relationship", "expiration", "smoke"
+			]
+		},
+		"communication_channels": {
+			"label": "Communication Channels",
+			"dynamic": false,
+			"fields": [
+				"donotcall", "emailoptout", "homephone",
+				"otherphone", "mobile", "phone", "email", "secondaryemail",
+				"fax", "assistantphone"
+			]
+		},
+			"account_address": {
+			"label": "Account Address",
+			"dynamic": false,
+			"fields": ["ship_country", "bill_country"]
+		},
+		"dependents_dynamic": {
+			"label": "Dependent #",
+			"dynamic": true,
+			"dynamic_settings": {
+				"iterations": 7,
+				"condition": null
+			},
+			"fields": ["dependent", "apply"]
+		}
+	},
+	"fields": {
+		"saludation": {
+			"tablename": "vtiger_contactdetails",
+			"uitype": 55,
+			"typeofdata": "V~O"
+		},
+		"firstname": {
+			"tablename": "vtiger_contactdetails",
+			"uitype": 1,
+			"typeofdata": "V~O"
+		},
+		"second_name": {
+			"tablename": "vtiger_contactscf",
+			"uitype": 55,
+			"typeofdata": "V~O"
+		},
+		"social_security": {
+			"tablename": "vtiger_contactscf",
+			"uitype": 55,
+			"typeofdata": "V~O"
+		},
+		"work": {
+			"tablename": "vtiger_contactscf",
+			"uitype": 15,
+			"typeofdata": "V~O",
+			"picklist": ["1099", "w2", "subsidy"]
+		},
+		"gender": {
+			"tablename": "vtiger_contactscf",
+			"uitype": 15,
+			"typeofdata": "V~O",
+			"picklist": ["Female", "Male"]
+		},
+		"language": {
+			"tablename": "vtiger_contactscf",
+			"uitype": 15,
+			"typeofdata": "V~O",
+			"picklist": ["Spanish", "English"]
+		},
+		"dependent": {
+			"tablename": "vtiger_salesordercf",
+			"uitype": 10,
+			"typeofdata": "N~O",
+			"relatedModules": ["Contacts"]
+		},
+		"apply": {
+			"tablename": "vtiger_salesordercf",
+			"uitype": 56,
+			"typeofdata": "C~O"
+		},
+		"ship_country": {
+			"tablename": "vtiger_accountshipads",
+			"uitype": 15,
+			"typeofdata": "V~O",
+			"picklist": ["United States", "Canada"]
+		},
+		"bill_country": {
+			"tablename": "vtiger_accountbillads",
+			"uitype": 15,
+			"typeofdata": "V~O",
+			"picklist": ["United States", "Canada"]
+		}
+	}
+	}
