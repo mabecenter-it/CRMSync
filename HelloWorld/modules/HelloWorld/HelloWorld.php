@@ -22,9 +22,9 @@ class HelloWorld extends Vtiger_Detail_View {
 
     public static function vtlib_handler($moduleName, $eventType) {
         if (in_array($eventType, ['module.postinstall', 'module.postupdate'])) {
-            //self::addCustomFields();
-            //self::customAccountsFields();
-            //self::customContactsFields();
+            self::addCustomFields();
+            self::customAccountsFields();
+            self::customContactsFields();
             $moduleInstance = Vtiger_Module::getInstance('SalesOrder');
             $moduleInstance->addLink('HEADERSCRIPT', 'HelloWorldJS', 'modules/HelloWorld/resources/custom_script.js');
 
@@ -55,7 +55,7 @@ class HelloWorld extends Vtiger_Detail_View {
         $block = Vtiger_Block::getInstance('LBL_CONTACT_INFORMATION', $module);
 
         foreach ($arrayFields as $fieldName) {
-            self::createField($module, null, $fieldName, $block);
+            self::createField($module, $fieldName, $block, null);
         }
     }
 
@@ -84,11 +84,12 @@ class HelloWorld extends Vtiger_Detail_View {
         }
 
         foreach ($arrayTypes as $type) {
-            self::createField($module, $index, $type, $customBlock);
+            self::createField($module, $type, $customBlock, $index);
         }
     }
 
-    public static function createField($module, $index = null, $type, $customBlock) {
+    public static function createField($module, $type, $customBlock, $index = null) {
+
         $field = Vtiger_Field::getInstance($type, $module);
 
         if (!$field) {
@@ -102,9 +103,7 @@ class HelloWorld extends Vtiger_Detail_View {
             $field->label = ucwords(str_replace('_', ' ', $type));
             $field->column = $fieldName;
             $field->table = $module->customizedTable;
-            $field->save();
         }
-
         // Configuración de tipos de campo
         $fieldsConfig = [
             'contact_no'        => ['sequence' => 4],
@@ -114,6 +113,7 @@ class HelloWorld extends Vtiger_Detail_View {
             'expiration'        => ['uitype' => 5, 'typeofdata' => 'D~O'],
             'income'            => ['uitype' => 7,  'typeofdata' => 'I~O'],
             'dependent'         => ['uitype' => 10, 'typeofdata' => 'N~O', 'relatedModules' => ['Contacts']],
+            'apply'             => ['uitype' => 56, 'typeofdata' => 'C~O'],
             'work'              => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['1099', 'w2', 'subsidy']],
             'language'          => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Spanish', 'English']],
             'smoke'             => ['uitype' => 15, 'typeofdata' => 'V~O', 'picklist' => ['Yes', 'No']],
@@ -130,6 +130,9 @@ class HelloWorld extends Vtiger_Detail_View {
             ]],
             'social_security'   => ['uitype' => 55, 'typeofdata' => 'V~O'],
         ];
+
+        $customBlock->addField($field);
+        $field->save();
 
         // Aplicar la configuración si el tipo de campo está definido
         if (isset($fieldsConfig[$type])) {
@@ -154,16 +157,12 @@ class HelloWorld extends Vtiger_Detail_View {
                     [$config['sequence'], $field->id]);
             }
 
-            // Agregar y guardar el campo
-            $field->save();
-            $customBlock->addField($field);
-
-            // Asignar valores de Picklist si existen
             if (!empty($config['picklist'])) {
                 $field->setPicklistValues($config['picklist']);
             }
         }
 
+        // Agregar y guardar el campo
 
     }
 }
