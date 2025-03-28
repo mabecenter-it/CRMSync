@@ -18,7 +18,7 @@ class PolicyAssembler:
         # Crear el objeto Contact a partir del registro.
 
         account = self.get_account(row)
-        contacts: List[Contact] = self.get_contacts(row, account.id)
+        contacts: List[Contact] = self.get_contacts(row, account)
         self.update_account(contacts, account.id)
         product = self.get_product(row)
 
@@ -64,43 +64,52 @@ class PolicyAssembler:
                 ship_code=row.get(cfg["ship_code"]),
             )
 
-    def get_product(self, row) -> Product:
+    def get_product(self, row: Series) -> Product:
         return Product(
             planid=row.get('cf_2035'),
             benefitid=row.get('cf_2203'),
         )
 
-    def get_contacts(self, row, accountid) -> List[Contact]:
+    def get_contacts(self, row: Series, account: Account) -> List[Contact]:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(current_dir, "contacts_mapping.json")
         with open(file_path, "r", encoding="utf-8") as f:
             contact_mapping = json.load(f)
 
         contacts = []
+        accountid = account.id
 
         for cfg in contact_mapping:
             # Si existe una clave "condition" y no se cumple, se salta este contacto.
             if "condition" in cfg and not row.get(cfg["condition"]):
                 continue
 
+            include_account = cfg.get("relationship") == "Owner"
+
             contacts.append(
                 Contact(
-                    # relationship=row.get(cfg["relationship"]),
                     first_name=row.get(cfg["first_name"]),
-                    last_name=row.get(cfg["last_name"]),
-                    apply=row.get(cfg["apply"]),
                     second_name=row.get(cfg["second_name"]),
-                    relationship=cfg["relationship"],
-                    gender=row.get(cfg["gender"]),
+                    last_name=row.get(cfg["last_name"]),
                     dob=row.get(cfg["dob"]),
                     ssn=row.get(cfg["ssn"]),
-                    document=row.get(cfg["document"]),
-                    memberid=row.get(cfg["memberid"]),
-                    # country=row.get(cfg["country"]),
-                    # work=row.get(cfg["work"]),
-                    username=row.get(cfg["username"]),
-                    password=row.get(cfg["password"]),
+                    work=row.get(cfg["work"]),
+                    gender=row.get(cfg["gender"]),
+                    language=row.get(cfg["language"]),  # implement
                     account_name=accountid,
+                    relationship=cfg["relationship"],
+                    document=row.get(cfg["document"]),
+                    mailing_street=row.get(cfg["ship_street"]),
+                    mailing_pobox=row.get(cfg["ship_pobox"]),
+                    mailing_city=row.get(cfg["ship_city"]),
+                    mailing_state=row.get(cfg["ship_state"]),
+                    mailing_code=row.get(cfg["ship_code"]),
+                    apply=row.get(cfg["apply"]),
+                    phone1=account.phone1 if include_account else None,
+                    otherphone=account.otherphone if include_account else None,
+                    emergencyphone=account.emergencyphone if include_account else None,
+                    email1=account.email1 if include_account else None,
+                    email2=account.email2 if include_account else None,
                 )
             )
         return contacts

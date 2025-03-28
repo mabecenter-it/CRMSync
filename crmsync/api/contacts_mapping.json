@@ -3,6 +3,7 @@
       "relationship": "Owner",
       "first_name": "cf_2293",
       "last_name": "cf_2297",
+      "apply": "cf_2385",
       "second_name": "cf_2295",
       "gender": "gender_0",
       "dob": "cf_2299",
@@ -16,7 +17,12 @@
       "jail": "cf_2333",
       "memberid": "cf_2119",
       "username": "cf_2339",
-      "password": "cf_2341"
+      "password": "cf_2341",
+      "ship_street": "cf_2737",
+      "ship_pobox": "cf_2759",
+      "ship_city": "cf_2739",
+      "ship_state": "cf_2765",
+      "ship_code": "cf_2743"
     },
     {
       "relationship": "Spouse",
@@ -36,7 +42,12 @@
       "jail": "",
       "memberid": "cf_2375",
       "username": "cf_2377",
-      "password": "cf_2379"
+      "password": "cf_2379",
+      "ship_street": "cf_2737",
+      "ship_pobox": "cf_2759",
+      "ship_city": "cf_2739",
+      "ship_state": "cf_2765",
+      "ship_code": "cf_2743"
     },
     {
       "relationship": "cf_2431",
@@ -56,7 +67,12 @@
       "smoke": "cf_2711",
       "memberid": "cf_2433",
       "username": "cf_2435",
-      "password": "cf_2437"
+      "password": "cf_2437",
+      "ship_street": "cf_2737",
+      "ship_pobox": "cf_2759",
+      "ship_city": "cf_2739",
+      "ship_state": "cf_2765",
+      "ship_code": "cf_2743"
     },
     {
       "relationship": "cf_2465",
@@ -76,7 +92,12 @@
       "smoke": "cf_2713",
       "memberid": "cf_2469",
       "username": "cf_2471",
-      "password": "cf_2473"
+      "password": "cf_2473",
+      "ship_street": "cf_2737",
+      "ship_pobox": "cf_2759",
+      "ship_city": "cf_2739",
+      "ship_state": "cf_2765",
+      "ship_code": "cf_2743"
     },
     {
       "relationship": "cf_2501",
@@ -96,7 +117,12 @@
       "smoke": "cf_2715",
       "memberid": "cf_2505",
       "username": "cf_2507",
-      "password": "cf_2509"
+      "password": "cf_2509",
+      "ship_street": "cf_2737",
+      "ship_pobox": "cf_2759",
+      "ship_city": "cf_2739",
+      "ship_state": "cf_2765",
+      "ship_code": "cf_2743"
     },
     {
       "relationship": "cf_2537",
@@ -116,7 +142,12 @@
       "smoke": "cf_2717",
       "memberid": "",
       "username": "cf_2545",
-      "password": "cf_2543"
+      "password": "cf_2543",
+      "ship_street": "cf_2737",
+      "ship_pobox": "cf_2759",
+      "ship_city": "cf_2739",
+      "ship_state": "cf_2765",
+      "ship_code": "cf_2743"
     },
     {
       "relationship": "cf_2699",
@@ -136,6 +167,11 @@
       "smoke": "",
       "memberid": "",
       "username": "",
-      "password": ""
+      "password": "",
+      "ship_street": "cf_2737",
+      "ship_pobox": "cf_2759",
+      "ship_city": "cf_2739",
+      "ship_state": "cf_2765",
+      "ship_code": "cf_2743"
     }
   ]

@@ -38,10 +38,9 @@ class Policy:
                 "invoicestatus": "Created",
                 "productid": self.productid,
                 "LineItems": [{"productid": self.productid, "listprice": "0", "quantity": "1"}],
-            } | {
-                f"cf_dependent_{i+1}": contact.id
-                for i, contact in enumerate([c for c in self.contacts[1:] if c.id])
-            },
+            }
+            | {f"cf_dependent_{i + 1}": contact.id for i, contact in enumerate([c for c in self.contacts[1:] if c.id])}
+            | {f"cf_apply_{i + 1}": contact.apply for i, contact in enumerate([c for c in self.contacts[1:] if c.id])},
         )
         self.id = policy.get("id")
 
